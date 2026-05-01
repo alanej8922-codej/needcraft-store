@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Needcraft Admin Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a192f;
+            --secondary: #fff5e1;
+            --accent: #64748b;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--primary);
+            color: var(--secondary);
+            margin: 0;
+            padding: 2rem 5%;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255, 245, 225, 0.05);
+            border: 1px solid rgba(255, 245, 225, 0.2);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 3rem;
+            overflow-x: auto;
+        }
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 245, 225, 0.1);
+        }
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+        tr:hover {
+            background: rgba(255, 245, 225, 0.02);
+        }
+        .badge {
+            background: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .empty-state {
+            text-align: center;
+            color: var(--accent);
+            padding: 2rem;
+            font-style: italic;
+        }
+        .btn-back {
+            display: inline-block;
+            background: transparent;
+            color: var(--secondary);
+            text-decoration: none;
+            border: 1px solid var(--secondary);
+            padding: 10px 20px;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="/" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
+        
+        <h1><i class="fa-solid fa-chart-line"></i> Admin Dashboard</h1>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-box-open"></i> Recent Orders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Address</th>
+                        <th>Total</th>
+                        <th>Method</th>
+                        <th>Items</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr><td colspan="8" class="empty-state">Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #00B9F1;"><i class="fa-solid fa-envelope"></i> Customer Messages</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="contactsTableBody">
+                    <tr><td colspan="5" class="empty-state">Loading messages...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data from the API
+        fetch('/api/admin/data')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    renderOrders(data.orders);
+                    renderContacts(data.contacts);
+                } else {
+                    alert('Failed to load data: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to connect to the server.');
+            });
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No orders found.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            orders.forEach(o => {
+                let itemsStr = '';
+                try {
+                    let itemsObj = JSON.parse(o.items);
+                    if (Object.keys(itemsObj).length === 0) {
+                        itemsStr = '<span style="color: #888;">N/A (Direct Buy)</span>';
+                    } else {
+                        for (let k in itemsObj) {
+                            itemsStr += `${itemsObj[k].qty}x ${itemsObj[k].name}<br>`;
+                        }
+                    }
+                } catch(e) {
+                    itemsStr = o.items;
+                }
+
+                html += `
+                    <tr>
+                        <td>#${o.id}</td>
+                        <td>${new Date(o.created_at).toLocaleString()}</td>
+                        <td><strong>${o.name}</strong></td>
+                        <td>${o.phone}</td>
+                        <td>${o.address}</td>
+                        <td style="font-weight: bold; color: #fff5e1;">${o.total_price}</td>
+                        <td><span class="badge">${o.payment_method.toUpperCase()}</span></td>
+                        <td style="font-size: 0.9rem;">${itemsStr}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderContacts(contacts) {
+            const tbody = document.getElementById('contactsTableBody');
+            if (contacts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No messages found.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            contacts.forEach(c => {
+                html += `
+                    <tr>
+                        <td>#${c.id}</td>
+                        <td>${new Date(c.created_at).toLocaleString()}</td>
+                        <td><strong>${c.name}</strong></td>
+                        <td><a href="mailto:${c.email}" style="color: #00B9F1;">${c.email}</a></td>
+                        <td style="max-width: 300px; line-height: 1.5;">"${c.message}"</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
