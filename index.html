@@ -7,6 +7,7 @@
     <meta name="description" content="Shop trending, eco-friendly, and functional lifestyle products at Needcraft.">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
             --primary: #fff5e1; /* Warm White accents */
@@ -1465,19 +1466,72 @@
             document.getElementById('paymentLoader').style.display = 'flex';
             document.getElementById('paymentCloseBtn').style.display = 'none';
             
-            fetch('/api/checkout', {
+            // Call Backend Create Order Endpoint
+            fetch('/api/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(checkoutData)
+                body: JSON.stringify({ amount: parseInt(checkoutData.totalPrice) * 100 }) // Razorpay expects paise
             })
             .then(res => res.json())
-            .then(data => {
-                showSuccessScreen();
-                cart = {};
-                updateCartUI();
+            .then(orderData => {
+                if(orderData.error) throw new Error(orderData.error);
+                
+                var options = {
+                    "key": "rzp_test_SjzoFhfzxlE67U", // Public key
+                    "amount": orderData.amount,
+                    "currency": orderData.currency,
+                    "name": "Needcraft Store",
+                    "description": "Purchase Payment",
+                    "order_id": orderData.id,
+                    "handler": function (response){
+                        // Verify Signature in Backend
+                        checkoutData.razorpay_payment_id = response.razorpay_payment_id;
+                        checkoutData.razorpay_order_id = response.razorpay_order_id;
+                        checkoutData.razorpay_signature = response.razorpay_signature;
+                        
+                        fetch('/api/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(checkoutData)
+                        })
+                        .then(res => res.json())
+                        .then(verifyData => {
+                            if(verifyData.error) throw new Error(verifyData.error);
+                            showSuccessScreen();
+                            cart = {};
+                            updateCartUI();
+                        })
+                        .catch(err => {
+                            alert('Payment verification failed: ' + err.message);
+                            closeModal('paymentModal');
+                        });
+                    },
+                    "prefill": {
+                        "name": checkoutData.name,
+                        "contact": checkoutData.phone
+                    },
+                    "theme": {
+                        "color": "#fff5e1"
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            document.getElementById('paymentSelection').style.display = 'block';
+                            document.getElementById('paymentLoader').style.display = 'none';
+                            document.getElementById('paymentCloseBtn').style.display = 'block';
+                        }
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response){
+                    alert('Payment Failed: ' + response.error.description);
+                    document.getElementById('paymentSelection').style.display = 'block';
+                    document.getElementById('paymentLoader').style.display = 'none';
+                    document.getElementById('paymentCloseBtn').style.display = 'block';
+                });
+                rzp1.open();
             })
             .catch(err => {
-                alert('Payment processing failed. Please try again.');
+                alert('Order creation failed. Please try again.');
                 closeModal('paymentModal');
             });
         }

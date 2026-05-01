@@ -4,6 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
 from dotenv import load_dotenv
+import razorpay
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,6 +13,9 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_KEY_ID else None
 
 def get_db_connection():
     if not DATABASE_URL:
@@ -60,21 +64,53 @@ def index():
 def admin():
     return send_from_directory('.', 'admin.html')
 
-@app.route('/api/checkout', methods=['POST'])
-def checkout():
+@app.route('/api/create-order', methods=['POST'])
+def create_order():
+    data = request.json
+    amount = data.get('amount')
+    currency = data.get('currency', 'INR')
+    
+    if not amount or int(amount) < 100:
+        return jsonify({'error': 'Invalid amount'}), 400
+        
+    try:
+        order = razorpay_client.order.create({
+            'amount': int(amount),
+            'currency': currency,
+            'payment_capture': '1'
+        })
+        return jsonify(order)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/verify-payment', methods=['POST'])
+def verify_payment():
     data = request.json
     if not data:
         return jsonify({'error': 'No data provided'}), 400
+    
+    razorpay_payment_id = data.get('razorpay_payment_id')
+    razorpay_order_id = data.get('razorpay_order_id')
+    razorpay_signature = data.get('razorpay_signature')
     
     name = data.get('name')
     phone = data.get('phone')
     address = data.get('address')
     total_price = data.get('totalPrice')
-    payment_method = data.get('paymentMethod')
+    payment_method = data.get('paymentMethod', 'Razorpay')
     items = data.get('items')
     
-    if not all([name, phone, address, total_price, payment_method, items]):
-        return jsonify({'error': 'Missing required fields'}), 400
+    if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature]):
+        return jsonify({'error': 'Missing payment verification fields'}), 400
+
+    try:
+        razorpay_client.utility.verify_payment_signature({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        })
+    except razorpay.errors.SignatureVerificationError:
+        return jsonify({'error': 'Payment signature verification failed'}), 400
 
     try:
         conn = get_db_connection()
@@ -87,7 +123,7 @@ def checkout():
         order_id = c.fetchone()[0]
         conn.commit()
         conn.close()
-        return jsonify({'success': True, 'message': 'Order placed successfully!', 'orderId': order_id}), 201
+        return jsonify({'success': True, 'message': 'Payment successful and order placed!', 'orderId': order_id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
