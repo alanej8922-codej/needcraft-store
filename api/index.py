@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import pg8000.dbapi
-import urllib.parse
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 from dotenv import load_dotenv
 import razorpay
@@ -9,29 +9,27 @@ import razorpay
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
-razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_KEY_ID else None
+
+# Safe Razorpay initialization
+try:
+    if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+        razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+    else:
+        razorpay_client = None
+except Exception as e:
+    print(f"Razorpay Init Error: {e}")
+    razorpay_client = None
 
 def get_db_connection():
     if not DATABASE_URL:
         raise Exception("DATABASE_URL is not set.")
-    url = urllib.parse.urlparse(DATABASE_URL)
-    
-    # URL decode password in case it contains @ or other special characters
-    password = urllib.parse.unquote(url.password) if url.password else None
-    
-    return pg8000.dbapi.connect(
-        user=url.username,
-        password=password,
-        host=url.hostname,
-        port=url.port,
-        database=url.path[1:]
-    )
+    return psycopg2.connect(DATABASE_URL)
 
 def init_db():
     try:
@@ -162,25 +160,14 @@ def contact():
 def admin_data():
     try:
         conn = get_db_connection()
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=RealDictCursor)
         
-        c.execute('SELECT id, name, phone, address, total_price, payment_method, items, created_at FROM orders ORDER BY created_at DESC')
-        orders_raw = c.fetchall()
-        orders = []
-        for row in orders_raw:
-            orders.append({
-                'id': row[0], 'name': row[1], 'phone': row[2], 'address': row[3],
-                'total_price': row[4], 'payment_method': row[5], 'items': row[6], 'created_at': row[7]
-            })
+        c.execute('SELECT * FROM orders ORDER BY created_at DESC')
+        orders = c.fetchall()
         
-        c.execute('SELECT id, name, email, message, created_at FROM contacts ORDER BY created_at DESC')
-        contacts_raw = c.fetchall()
-        contacts = []
-        for row in contacts_raw:
-            contacts.append({
-                'id': row[0], 'name': row[1], 'email': row[2], 'message': row[3], 'created_at': row[4]
-            })
-            
+        c.execute('SELECT * FROM contacts ORDER BY created_at DESC')
+        contacts = c.fetchall()
+        
         conn.close()
         return jsonify({'success': True, 'orders': orders, 'contacts': contacts})
     except Exception as e:
