@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import pg8000.dbapi
+import urllib.parse
 import os
 from dotenv import load_dotenv
 import razorpay
@@ -19,8 +19,19 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) i
 
 def get_db_connection():
     if not DATABASE_URL:
-        raise Exception("DATABASE_URL is not set. Please check your .env file.")
-    return psycopg2.connect(DATABASE_URL)
+        raise Exception("DATABASE_URL is not set.")
+    url = urllib.parse.urlparse(DATABASE_URL)
+    
+    # URL decode password in case it contains @ or other special characters
+    password = urllib.parse.unquote(url.password) if url.password else None
+    
+    return pg8000.dbapi.connect(
+        user=url.username,
+        password=password,
+        host=url.hostname,
+        port=url.port,
+        database=url.path[1:]
+    )
 
 def init_db():
     try:
@@ -56,13 +67,7 @@ def init_db():
         print("Database connection failed. Please check your DATABASE_URL in .env.")
         print(e)
 
-@app.route('/')
-def index():
-    return send_from_directory('.', 'index.html')
-
-@app.route('/admin')
-def admin():
-    return send_from_directory('.', 'admin.html')
+# Static routes removed for Vercel native serving
 
 @app.route('/api/create-order', methods=['POST'])
 def create_order():
@@ -157,14 +162,25 @@ def contact():
 def admin_data():
     try:
         conn = get_db_connection()
-        c = conn.cursor(cursor_factory=RealDictCursor)
+        c = conn.cursor()
         
-        c.execute('SELECT * FROM orders ORDER BY created_at DESC')
-        orders = c.fetchall()
+        c.execute('SELECT id, name, phone, address, total_price, payment_method, items, created_at FROM orders ORDER BY created_at DESC')
+        orders_raw = c.fetchall()
+        orders = []
+        for row in orders_raw:
+            orders.append({
+                'id': row[0], 'name': row[1], 'phone': row[2], 'address': row[3],
+                'total_price': row[4], 'payment_method': row[5], 'items': row[6], 'created_at': row[7]
+            })
         
-        c.execute('SELECT * FROM contacts ORDER BY created_at DESC')
-        contacts = c.fetchall()
-        
+        c.execute('SELECT id, name, email, message, created_at FROM contacts ORDER BY created_at DESC')
+        contacts_raw = c.fetchall()
+        contacts = []
+        for row in contacts_raw:
+            contacts.append({
+                'id': row[0], 'name': row[1], 'email': row[2], 'message': row[3], 'created_at': row[4]
+            })
+            
         conn.close()
         return jsonify({'success': True, 'orders': orders, 'contacts': contacts})
     except Exception as e:
