@@ -1,23 +1,21 @@
-import traceback
-try:
-    from flask import Flask, request, jsonify, send_from_directory
-    from flask_cors import CORS
-    import pg8000.dbapi
-    import urllib.parse
-    import os
-    from dotenv import load_dotenv
-    import razorpay
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+import pg8000.dbapi
+import urllib.parse
+import os
+from dotenv import load_dotenv
+import razorpay
 
-    # Load environment variables from .env file
-    load_dotenv()
+# Load environment variables from .env file
+load_dotenv()
 
-    app = Flask(__name__, static_folder='.', static_url_path='')
-    CORS(app)
+app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)
 
-    DATABASE_URL = os.getenv('DATABASE_URL')
-    RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
-    RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
-    razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_KEY_ID else None
+DATABASE_URL = os.getenv('DATABASE_URL')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)) if RAZORPAY_KEY_ID else None
 
 def get_db_connection():
     if not DATABASE_URL:
@@ -187,20 +185,6 @@ def admin_data():
         return jsonify({'success': True, 'orders': orders, 'contacts': contacts})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-except Exception as startup_error:
-    from flask import Flask, jsonify
-    app = Flask(__name__)
-    error_tb = traceback.format_exc()
-    
-    @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
-    @app.route('/<path:path>', methods=['GET', 'POST'])
-    def catch_all(path):
-        return jsonify({
-            "error": "Vercel Python Initialization Crashed",
-            "message": str(startup_error),
-            "traceback": error_tb
-        }), 500
 
 if __name__ == '__main__':
     # Make sure to run init_db to set up the tables
