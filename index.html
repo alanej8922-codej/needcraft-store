@@ -1589,33 +1589,37 @@
         }
 
         // Live Purchase Popup Logic
-        const popupData = [
-            { name: 'Priya from Mumbai', product: 'Thumb Wall Hooks', img: 'thumb_hook.png', time: 'Just now' },
-            { name: 'Rahul from Delhi', product: 'Steel Straw Set', img: 'steel_straw_set.png', time: '2 mins ago' },
-            { name: 'Anjali from Bangalore', product: 'Thumb Wall Hooks', img: 'thumb_hook.png', time: '5 mins ago' },
-            { name: 'Vikram from Pune', product: 'Steel Straw Set', img: 'steel_straw_set.png', time: 'Just now' }
+        const buyerNames = ["Alen", "Vibin", "Abin", "Krish", "Mariyam", "Diya", "Grace", "Abil", "Ashlin", "Bavya", "Anjali", "Anohar", "Kumar", "Akil", "Nayana", "Kiran", "Arjun Nair", "Rahul Sharma", "Anil Kumar", "Suresh Babu", "Ramesh Menon", "Karthik Iyer", "Vivek Patel", "Sanjay Verma", "Deepak Singh", "Mohan Das", "Priya Nair", "Anjali Sharma", "Meera Iyer", "Lakshmi Menon", "Kavya Reddy", "Neha Gupta", "Pooja Patel", "Aishwarya Nair", "Sneha Iyer", "Divya Sharma"];
+        const buyerLocations = ["Delhi", "Mumbai", "Bangalore", "Thrissur", "Kochi", "Pune", "Chennai", "Hyderabad", "Ahmedabad", "Kolkata", "Trivandrum", "Calicut", "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam"];
+        const popupProducts = [
+            { name: 'Thumb Wall Hooks', img: 'thumb_hook.png' },
+            { name: 'Steel Straw Set', img: 'steel_straw_set.png' }
         ];
+        const popupTimes = ['Just now', '1 min ago', '2 mins ago', 'Just now', '3 mins ago'];
 
         function showRandomPopup() {
             const popup = document.getElementById('purchasePopup');
-            if(popup.classList.contains('show')) return;
-
-            const randomData = popupData[Math.floor(Math.random() * popupData.length)];
             
-            document.getElementById('popupImg').src = randomData.img;
-            document.getElementById('popupBuyer').innerText = randomData.name;
-            document.getElementById('popupProduct').innerText = randomData.product;
-            document.getElementById('popupTime').innerText = randomData.time;
+            const randomName = buyerNames[Math.floor(Math.random() * buyerNames.length)];
+            const randomLoc = buyerLocations[Math.floor(Math.random() * buyerLocations.length)];
+            const randomProd = popupProducts[Math.floor(Math.random() * popupProducts.length)];
+            const randomTime = popupTimes[Math.floor(Math.random() * popupTimes.length)];
+            
+            document.getElementById('popupImg').src = randomProd.img;
+            document.getElementById('popupBuyer').innerText = randomName + " from " + randomLoc;
+            document.getElementById('popupProduct').innerText = randomProd.name;
+            document.getElementById('popupTime').innerText = randomTime;
 
             popup.classList.add('show');
 
             setTimeout(() => {
                 popup.classList.remove('show');
-            }, 5000);
+            }, 2500); // Stay on screen for 2.5 seconds
         }
 
-        setInterval(showRandomPopup, Math.floor(Math.random() * 8000) + 12000);
-        setTimeout(showRandomPopup, 5000);
+        // Show a new popup every 3 seconds
+        setInterval(showRandomPopup, 3000);
+        setTimeout(showRandomPopup, 1000);
 
         // Close modal when clicking outside
         window.onclick = function(event) {
