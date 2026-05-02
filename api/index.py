@@ -16,16 +16,20 @@ except ImportError:
     RAZORPAY_AVAILABLE = False
     print("WARNING: Razorpay library could not be loaded!")
 
-app = Flask(__name__, static_folder='public', static_url_path='')
+# Determine paths
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+public_dir = os.path.join(parent_dir, 'public')
+
+app = Flask(__name__, static_folder=public_dir, static_url_path='')
 CORS(app)
 
 @app.route('/')
 def index():
     try:
-        # Try finding public/index.html relative to the root
         return app.send_static_file('index.html')
-    except:
-        return "Backend is Live! Please visit /index.html if this page 404s."
+    except Exception as e:
+        return f"Backend is Live! But index.html was not found in {public_dir}. Error: {e}"
 
 @app.route('/admin')
 def admin():
