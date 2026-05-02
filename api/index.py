@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import razorpay
 import os
-import pg8000.dbapi
+import pg8000
 import urllib.parse
 from dotenv import load_dotenv
 
@@ -42,7 +42,7 @@ def get_db_connection():
         
         print(f"Connecting to {hostname}:{port}/{database} as {username}...")
         
-        return pg8000.dbapi.connect(
+        return pg8000.connect(
             user=username,
             password=password,
             host=hostname,
@@ -131,15 +131,16 @@ def seed_products():
         finally:
             conn.close()
 
-# Initialize DB and Seed safely
-try:
-    init_db()
-    seed_products()
-except Exception as e:
-    print(f"Database initialization skipped or failed: {e}")
-
+# Routes
 @app.route('/api/products', methods=['GET'])
 def get_products():
+    # Ensure DB is initialized on first request
+    try:
+        init_db()
+        seed_products()
+    except:
+        pass
+
     try:
         conn = get_db_connection()
         if conn:
