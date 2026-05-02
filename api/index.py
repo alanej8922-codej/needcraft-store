@@ -18,8 +18,7 @@ except ImportError:
 
 # Determine paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-public_dir = os.path.join(parent_dir, 'public')
+public_dir = os.path.join(current_dir, 'public')
 
 app = Flask(__name__, static_folder=public_dir, static_url_path='')
 CORS(app)
