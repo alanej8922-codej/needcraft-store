@@ -16,8 +16,16 @@ except ImportError:
     RAZORPAY_AVAILABLE = False
     print("WARNING: Razorpay library could not be loaded!")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+@app.route('/admin')
+def admin():
+    return app.send_static_file('admin.html')
 
 # Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
