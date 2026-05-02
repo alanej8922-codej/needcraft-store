@@ -9,19 +9,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__, static_folder='../public', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
-print(f"Current Working Directory: {os.getcwd()}")
-print(f"Files in current dir: {os.listdir('.')}")
-
-@app.route('/')
-def index():
-    return app.send_static_file('index.html')
-
-@app.route('/admin')
-def admin():
-    return app.send_static_file('admin.html')
+# API Routes
 
 # Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
