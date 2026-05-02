@@ -3,3 +3,5 @@ Flask-Cors==4.0.0
 pg8000==1.30.5
 razorpay==1.4.1
 python-dotenv==1.0.1
+scramp==1.4.4
+asn1crypto==1.5.1
