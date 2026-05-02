@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import razorpay
 import os
-import pg8000
+# import pg8000
 import urllib.parse
 from dotenv import load_dotenv
 
@@ -134,12 +134,12 @@ def seed_products():
 # Routes
 @app.route('/api/products', methods=['GET'])
 def get_products():
-    # Ensure DB is initialized on first request
-    try:
-        init_db()
-        seed_products()
-    except:
-        pass
+    # TEMPORARILY DISABLED DB CHECK
+    # try:
+    #     init_db()
+    #     seed_products()
+    # except:
+    #     pass
 
     try:
         conn = get_db_connection()
