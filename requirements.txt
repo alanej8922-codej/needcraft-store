@@ -1,5 +1,5 @@
-Flask==2.2.5
-Flask-Cors==4.0.0
-psycopg2-binary==2.9.9
-razorpay==1.4.1
-python-dotenv==1.0.1
+Flask
+Flask-Cors
+psycopg2-binary
+razorpay
+python-dotenv
