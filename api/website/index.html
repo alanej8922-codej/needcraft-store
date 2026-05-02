@@ -953,6 +953,84 @@
                 font-size: 26px;
             }
         }
+        /* Product Card Carousel Styles */
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .product-slider {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+        }
+
+        .product-slider img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 11;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-image-container:hover .slider-arrow {
+            opacity: 1;
+        }
+
+        .slider-arrow:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
     </style>
     <!-- Vanilla Tilt JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
@@ -1667,6 +1745,7 @@
                         const grid = document.getElementById('productGrid');
                         grid.innerHTML = '';
                         data.products.forEach(p => {
+                            const images = p.image_url.split('|');
                             const card = document.createElement('div');
                             card.className = 'product-card stagger-child';
                             card.setAttribute('data-tilt', '');
@@ -1675,11 +1754,23 @@
                             card.setAttribute('data-tilt-glare', 'true');
                             card.setAttribute('data-tilt-max-glare', '0.05');
                             
-                            card.innerHTML = `
-                                <div class="product-img-wrapper">
-                                    <img src="${p.image_url}" alt="${p.name}" class="img-main">
-                                    <img src="${p.hover_image_url}" alt="${p.name} in use" class="img-hover">
+                            let sliderHtml = `
+                                <div class="product-image-container" id="container-${p.id}">
+                                    <div class="product-slider" id="slider-${p.id}">
+                                        ${images.map(img => `<img src="${img}" alt="${p.name}">`).join('')}
+                                    </div>
+                                    ${images.length > 1 ? `
+                                        <div class="slider-arrow arrow-left" onclick="event.stopPropagation(); moveSlider(${p.id}, -1, ${images.length})"><i class="fas fa-chevron-left"></i></div>
+                                        <div class="slider-arrow arrow-right" onclick="event.stopPropagation(); moveSlider(${p.id}, 1, ${images.length})"><i class="fas fa-chevron-right"></i></div>
+                                        <div class="slider-controls">
+                                            ${images.map((_, i) => `<div class="slider-dot ${i === 0 ? 'active' : ''}" onclick="event.stopPropagation(); goToSlide(${p.id}, ${i}, ${images.length})"></div>`).join('')}
+                                        </div>
+                                    ` : ''}
                                 </div>
+                            `;
+
+                            card.innerHTML = `
+                                ${sliderHtml}
                                 ${p.badge ? `<div class="badge" style="width: max-content;">${p.badge}</div>` : ''}
                                 <div class="product-title">${p.name}</div>
                                 <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
@@ -1707,7 +1798,7 @@
                             grid.appendChild(card);
                         });
                         
-                        // Re-initialize Tilt.js for dynamic elements
+                        // Re-initialize Tilt.js
                         if (window.VanillaTilt) {
                             VanillaTilt.init(document.querySelectorAll(".product-card"));
                         }
@@ -1717,6 +1808,33 @@
                     console.error('Error loading products:', err);
                     document.getElementById('productGrid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ff4444;">Failed to load products. Please try again later.</p>';
                 });
+        }
+        // Product Slider Logic
+        const sliderStates = {};
+
+        function moveSlider(productId, direction, totalSlides) {
+            if (!sliderStates[productId]) sliderStates[productId] = 0;
+            
+            sliderStates[productId] = (sliderStates[productId] + direction + totalSlides) % totalSlides;
+            updateSlider(productId, sliderStates[productId]);
+        }
+
+        function goToSlide(productId, slideIndex, totalSlides) {
+            sliderStates[productId] = slideIndex;
+            updateSlider(productId, slideIndex);
+        }
+
+        function updateSlider(productId, index) {
+            const slider = document.getElementById(`slider-${productId}`);
+            const container = document.getElementById(`container-${productId}`);
+            const dots = container.querySelectorAll('.slider-dot');
+            
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            
+            dots.forEach((dot, i) => {
+                if (i === index) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
         }
     </script>
     <!-- WhatsApp Floating Button -->
