@@ -57,6 +57,7 @@ def init_db():
                     address TEXT,
                     total_price TEXT,
                     items TEXT,
+                    payment_method TEXT,
                     razorpay_order_id TEXT,
                     razorpay_payment_id TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -123,13 +124,14 @@ def verify_payment():
         if conn:
             cursor = conn.cursor()
             cursor.execute(
-                'INSERT INTO orders (name, phone, address, total_price, items, razorpay_order_id, razorpay_payment_id) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                'INSERT INTO orders (name, phone, address, total_price, items, payment_method, razorpay_order_id, razorpay_payment_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
                 (
                     data.get('name'),
                     data.get('phone'),
                     data.get('address'),
                     data.get('totalPrice'),
                     data.get('items'),
+                    data.get('paymentMethod'),
                     data.get('razorpay_order_id'),
                     data.get('razorpay_payment_id')
                 )
@@ -181,9 +183,10 @@ def admin_data():
                     'address': row[3],
                     'totalPrice': row[4],
                     'items': row[5],
-                    'order_id': row[6],
-                    'payment_id': row[7],
-                    'created_at': row[8]
+                    'payment_method': row[6] or 'N/A',
+                    'order_id': row[7],
+                    'payment_id': row[8],
+                    'created_at': row[9]
                 })
                 
             # Fetch contacts
@@ -200,7 +203,7 @@ def admin_data():
                 })
                 
             conn.close()
-            return jsonify({'orders': orders_list, 'contacts': contacts_list})
+            return jsonify({'success': True, 'orders': orders_list, 'contacts': contacts_list})
         else:
             return jsonify({'error': 'Database connection failed'}), 500
     except Exception as e:
