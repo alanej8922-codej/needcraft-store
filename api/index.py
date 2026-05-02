@@ -16,12 +16,16 @@ except ImportError:
     RAZORPAY_AVAILABLE = False
     print("WARNING: Razorpay library could not be loaded!")
 
-app = Flask(__name__, static_folder='../public', static_url_path='')
+app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
 
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    try:
+        # Try finding public/index.html relative to the root
+        return app.send_static_file('index.html')
+    except:
+        return "Backend is Live! Please visit /index.html if this page 404s."
 
 @app.route('/admin')
 def admin():
@@ -38,7 +42,7 @@ def get_db_connection():
     try:
         return psycopg2.connect(DATABASE_URL, sslmode='require')
     except Exception as e:
-        print(f"DB Error: {e}")
+        print(f"CRITICAL DB ERROR: {e}")
         return None
 
 @app.route('/api/hello')
