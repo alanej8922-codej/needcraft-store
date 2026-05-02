@@ -967,68 +967,9 @@
     <!-- Products Section -->
     <section class="products reveal" id="products">
         <h2>Our Products</h2>
-        <div class="product-grid">
-            <!-- Product 1 -->
-            <div class="product-card stagger-child" data-tilt data-tilt-max="3" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.05">
-                <div class="product-img-wrapper">
-                    <img src="thumb_hook.png" alt="Thumb Wall Hooks for Hanging" class="img-main">
-                    <img src="https://images.unsplash.com/photo-1616401784845-180882ba9ba8?q=80&w=600&auto=format&fit=crop" alt="Thumb Hooks in Use" class="img-hover">
-                </div>
-                <div class="badge" style="width: max-content;">Best Seller</div>
-                <div class="product-title">Thumb Wall Hooks (Pack of 10)</div>
-                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                <div class="product-desc">Thumb Wall Hooks for Hanging, Cable Clips, No Punching Key Hook Holder, Wall Hangers Silicone Hooks Desk Wire Management, Random Color, Pack of 10 (Big Size), Multicolour.</div>
-                <div style="color: #4CAF50; font-weight: 800; font-size: 0.95rem; margin: 5px 0;"><i class="fa-solid fa-truck-fast"></i> Guaranteed 3-Day Delivery</div>
-                <div class="price" style="font-size: 1.8rem;">₹200 <span class="old-price" style="font-size: 1rem;">₹399</span></div>
-                <div class="product-meta">
-                    <button class="btn btn-secondary" onclick="addToCart('hook', 'Thumb Wall Hooks (Pack of 10)', 200)" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
-                        <i class="fa-solid fa-cart-plus"></i> Add
-                    </button>
-                    <button class="btn btn-primary" onclick="buyNow('hook', 'Thumb Wall Hooks (Pack of 10)', 200)" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
-                        Buy Now
-                    </button>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center; font-size: 0.8rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);">
-                    <div style="margin-bottom: 5px;"><i class="fa-solid fa-lock" style="color: #4CAF50;"></i> Guaranteed Safe & Secure Checkout</div>
-                    <div style="font-size: 1.5rem; display: flex; justify-content: center; gap: 10px; opacity: 0.8;">
-                        <i class="fa-brands fa-cc-visa"></i>
-                        <i class="fa-brands fa-cc-mastercard"></i>
-                        <i class="fa-brands fa-cc-paypal"></i>
-                        <i class="fa-brands fa-cc-apple-pay"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product 2 -->
-            <div class="product-card stagger-child" data-tilt data-tilt-max="3" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.05">
-                <div class="product-img-wrapper">
-                    <img src="steel_straw_set.png" alt="Stainless Steel Straw Set" class="img-main">
-                    <img src="https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=600&auto=format&fit=crop" alt="Steel Straws in Use" class="img-hover">
-                </div>
-                <div class="badge" style="width: max-content; color: #4CAF50; background: rgba(76, 175, 80, 0.1);">Eco-Friendly</div>
-                <div class="product-title">(5 Pc Combo) Stainless Steel Straw Set</div>
-                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
-                <div class="product-desc">Premium reusable stainless steel straw set for juices & smoothies. Includes a cleaning brush. A trending kitchen product & travel must-have!</div>
-                <div style="color: #4CAF50; font-weight: 800; font-size: 0.95rem; margin: 5px 0;"><i class="fa-solid fa-truck-fast"></i> Guaranteed 3-Day Delivery</div>
-                <div class="price" style="font-size: 1.8rem;">₹250 <span class="old-price" style="font-size: 1rem;">₹499</span></div>
-                <div class="product-meta">
-                    <button class="btn btn-secondary" onclick="addToCart('straw', 'Stainless Steel Straw Set', 250)" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
-                        <i class="fa-solid fa-cart-plus"></i> Add
-                    </button>
-                    <button class="btn btn-primary" onclick="buyNow('straw', 'Stainless Steel Straw Set', 250)" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
-                        Buy Now
-                    </button>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center; font-size: 0.8rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);">
-                    <div style="margin-bottom: 5px;"><i class="fa-solid fa-lock" style="color: #4CAF50;"></i> Guaranteed Safe & Secure Checkout</div>
-                    <div style="font-size: 1.5rem; display: flex; justify-content: center; gap: 10px; opacity: 0.8;">
-                        <i class="fa-brands fa-cc-visa"></i>
-                        <i class="fa-brands fa-cc-mastercard"></i>
-                        <i class="fa-brands fa-cc-paypal"></i>
-                        <i class="fa-brands fa-cc-apple-pay"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="product-grid" id="productGrid">
+            <!-- Products will be loaded dynamically -->
+            <p style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading premium products...</p>
         </div>
     </section>
 
@@ -1655,6 +1596,68 @@
                 bgVideo.style.transform = `translate(-50%, -50%) translate(${-x * 0.5}px, ${-y * 0.5}px)`;
             }
         });
+        // Load products dynamically
+        document.addEventListener('DOMContentLoaded', loadProducts);
+
+        function loadProducts() {
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const grid = document.getElementById('productGrid');
+                        grid.innerHTML = '';
+                        data.products.forEach(p => {
+                            const card = document.createElement('div');
+                            card.className = 'product-card stagger-child';
+                            card.setAttribute('data-tilt', '');
+                            card.setAttribute('data-tilt-max', '3');
+                            card.setAttribute('data-tilt-speed', '400');
+                            card.setAttribute('data-tilt-glare', 'true');
+                            card.setAttribute('data-tilt-max-glare', '0.05');
+                            
+                            card.innerHTML = `
+                                <div class="product-img-wrapper">
+                                    <img src="${p.image_url}" alt="${p.name}" class="img-main">
+                                    <img src="${p.hover_image_url}" alt="${p.name} in use" class="img-hover">
+                                </div>
+                                ${p.badge ? `<div class="badge" style="width: max-content;">${p.badge}</div>` : ''}
+                                <div class="product-title">${p.name}</div>
+                                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                                <div class="product-desc">${p.description}</div>
+                                <div style="color: #4CAF50; font-weight: 800; font-size: 0.95rem; margin: 5px 0;"><i class="fa-solid fa-truck-fast"></i> Guaranteed 3-Day Delivery</div>
+                                <div class="price" style="font-size: 1.8rem;">₹${p.price} ${p.original_price ? `<span class="old-price" style="font-size: 1rem;">₹${p.original_price}</span>` : ''}</div>
+                                <div class="product-meta">
+                                    <button class="btn btn-secondary" onclick="addToCart('${p.id}', '${p.name}', ${p.price})" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
+                                        <i class="fa-solid fa-cart-plus"></i> Add
+                                    </button>
+                                    <button class="btn btn-primary" onclick="buyNow('${p.id}', '${p.name}', ${p.price})" style="padding: 10px 20px; font-size: 1rem; flex: 1;">
+                                        Buy Now
+                                    </button>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center; font-size: 0.8rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="margin-bottom: 5px;"><i class="fa-solid fa-lock" style="color: #4CAF50;"></i> Guaranteed Safe & Secure Checkout</div>
+                                    <div style="font-size: 1.5rem; display: flex; justify-content: center; gap: 10px; opacity: 0.8;">
+                                        <i class="fa-brands fa-cc-visa"></i>
+                                        <i class="fa-brands fa-cc-mastercard"></i>
+                                        <i class="fa-brands fa-cc-paypal"></i>
+                                        <i class="fa-brands fa-cc-apple-pay"></i>
+                                    </div>
+                                </div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                        
+                        // Re-initialize Tilt.js for dynamic elements
+                        if (window.VanillaTilt) {
+                            VanillaTilt.init(document.querySelectorAll(".product-card"));
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading products:', err);
+                    document.getElementById('productGrid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ff4444;">Failed to load products. Please try again later.</p>';
+                });
+        }
     </script>
 </body>
 </html>

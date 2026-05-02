@@ -105,7 +105,21 @@
         <h1><i class="fa-solid fa-chart-line"></i> Admin Dashboard</h1>
 
         <div class="card">
-            <h2><i class="fa-solid fa-box-open"></i> Recent Orders</h2>
+            <h2 style="color: #FFC107;"><i class="fa-solid fa-plus"></i> Add New Product</h2>
+            <form id="productForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="text" id="pName" placeholder="Product Name" required style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <input type="number" id="pPrice" placeholder="Price (₹)" required style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <input type="number" id="pOldPrice" placeholder="Original Price (₹)" style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <input type="text" id="pBadge" placeholder="Badge (e.g. Best Seller)" style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <input type="text" id="pImg" placeholder="Main Image URL" required style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <input type="text" id="pHoverImg" placeholder="Hover Image URL" style="padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white;">
+                <textarea id="pDesc" placeholder="Product Description" required style="grid-column: 1 / -1; padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; height: 100px;"></textarea>
+                <button type="submit" class="btn-back" style="grid-column: 1 / -1; margin: 0; background: #FFC107; color: black; border: none; font-weight: bold; cursor: pointer;">Add Product</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 style="color: #4CAF50;"><i class="fa-solid fa-box-open"></i> Recent Orders</h2>
             <table>
                 <thead>
                     <tr>
@@ -145,6 +159,37 @@
     </div>
 
     <script>
+        // Handle Product Form
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const product = {
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                original_price: document.getElementById('pOldPrice').value,
+                badge: document.getElementById('pBadge').value,
+                image_url: document.getElementById('pImg').value,
+                hover_image_url: document.getElementById('pHoverImg').value,
+                description: document.getElementById('pDesc').value
+            };
+
+            fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Product added successfully!');
+                    document.getElementById('productForm').reset();
+                    // Optional: refresh a product list table if you add one
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(err => alert('Failed to connect to server.'));
+        });
+
         // Fetch data from the API
         fetch('/api/admin/data')
             .then(res => res.json())

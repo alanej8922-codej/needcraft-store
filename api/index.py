@@ -9,8 +9,16 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+@app.route('/admin')
+def admin():
+    return app.send_static_file('admin.html')
 
 # Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
@@ -73,6 +81,22 @@ def init_db():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            # Create products table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS products (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    price DECIMAL(10, 2) NOT NULL,
+                    original_price DECIMAL(10, 2),
+                    image_url TEXT,
+                    hover_image_url TEXT,
+                    badge TEXT,
+                    is_best_seller BOOLEAN DEFAULT FALSE,
+                    is_eco_friendly BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
             conn.commit()
             print("Database tables initialized successfully")
         except Exception as e:
@@ -80,10 +104,87 @@ def init_db():
         finally:
             conn.close()
 
-# Initialize DB on startup (in serverless environment, this runs once per cold start)
-init_db()
+def seed_products():
+    conn = get_db_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) FROM products')
+            if cursor.fetchone()[0] == 0:
+                print("Seeding initial products...")
+                products = [
+                    ('Thumb Wall Hooks (Pack of 10)', 'Thumb Wall Hooks for Hanging, Cable Clips, No Punching Key Hook Holder, Wall Hangers Silicone Hooks Desk Wire Management, Random Color, Pack of 10 (Big Size), Multicolour.', 200, 399, 'thumb_hook.png', 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?q=80&w=600&auto=format&fit=crop', 'Best Seller', True, False),
+                    ('(5 Pc Combo) Stainless Steel Straw Set', 'Premium reusable stainless steel straw set for juices & smoothies. Includes a cleaning brush. A trending kitchen product & travel must-have!', 250, 499, 'steel_straw_set.png', 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=600&auto=format&fit=crop', 'Eco-Friendly', False, True)
+                ]
+                for p in products:
+                    cursor.execute('''
+                        INSERT INTO products (name, description, price, original_price, image_url, hover_image_url, badge, is_best_seller, is_eco_friendly)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ''', p)
+                conn.commit()
+                print("Products seeded successfully")
+        except Exception as e:
+            print(f"Error seeding products: {str(e)}")
+        finally:
+            conn.close()
 
-@app.route('/api/hello', methods=['GET'])
+# Initialize DB and Seed
+init_db()
+seed_products()
+
+@app.route('/api/products', methods=['GET'])
+def get_products():
+    try:
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM products ORDER BY created_at ASC')
+            rows = cursor.fetchall()
+            products = []
+            for r in rows:
+                products.append({
+                    'id': r[0],
+                    'name': r[1],
+                    'description': r[2],
+                    'price': float(r[3]),
+                    'original_price': float(r[4]) if r[4] else None,
+                    'image_url': r[5],
+                    'hover_image_url': r[6],
+                    'badge': r[7],
+                    'is_best_seller': r[8],
+                    'is_eco_friendly': r[9]
+                })
+            conn.close()
+            return jsonify({'success': True, 'products': products})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products', methods=['POST'])
+def add_product():
+    try:
+        data = request.json
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO products (name, description, price, original_price, image_url, hover_image_url, badge, is_best_seller, is_eco_friendly)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''', (
+                data.get('name'),
+                data.get('description'),
+                data.get('price'),
+                data.get('original_price'),
+                data.get('image_url'),
+                data.get('hover_image_url'),
+                data.get('badge'),
+                data.get('is_best_seller', False),
+                data.get('is_eco_friendly', False)
+            ))
+            conn.commit()
+            conn.close()
+            return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 def hello():
     return jsonify({"message": "Needcraft API is live!"})
 
