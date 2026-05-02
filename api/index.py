@@ -18,9 +18,9 @@ except ImportError:
 
 # Determine paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
-public_dir = os.path.join(current_dir, 'public')
+website_dir = os.path.join(current_dir, 'website')
 
-app = Flask(__name__, static_folder=public_dir, static_url_path='')
+app = Flask(__name__, static_folder=website_dir, static_url_path='')
 CORS(app)
 
 @app.route('/')
@@ -28,7 +28,7 @@ def index():
     try:
         return app.send_static_file('index.html')
     except Exception as e:
-        return f"Backend is Live! But index.html was not found in {public_dir}. Error: {e}"
+        return f"Backend is Live! But index.html was not found in {website_dir}. Error: {e}"
 
 @app.route('/admin')
 def admin():
