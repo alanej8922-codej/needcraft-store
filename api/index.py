@@ -45,23 +45,19 @@ def get_db_connection():
     try:
         return psycopg2.connect(DATABASE_URL, sslmode='require')
     except Exception as e:
-        return str(e)
+        print(f"DB Error: {e}")
+        return None
 
 @app.route('/api/hello')
 def hello():
-    # Test DB connection directly
-    conn_result = get_db_connection()
-    if isinstance(conn_result, str):
-        return jsonify({"status": "DB_ERROR", "error": conn_result})
-    return jsonify({"status": "OK", "message": "Backend is fully live!"})
+    status = "OK" if RAZORPAY_AVAILABLE else "RAZORPAY_MISSING"
+    return jsonify({"status": status, "message": "Needcraft API is healthy!"})
 
 @app.route('/api/products', methods=['GET'])
 def get_products():
-    conn_result = get_db_connection()
-    if isinstance(conn_result, str):
-        return jsonify({'success': False, 'error': f'DB Connection Failed: {conn_result}'}), 500
-    
-    conn = conn_result
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'error': 'Database connection failed'}), 500
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('SELECT * FROM products ORDER BY created_at ASC')
