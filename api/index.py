@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__, static_folder='../public', static_url_path='')
+app = Flask(__name__, static_folder='public', static_url_path='')
 CORS(app)
 
 @app.route('/')
@@ -128,9 +128,12 @@ def seed_products():
         finally:
             conn.close()
 
-# Initialize DB and Seed
-init_db()
-seed_products()
+# Initialize DB and Seed safely
+try:
+    init_db()
+    seed_products()
+except Exception as e:
+    print(f"Database initialization skipped or failed: {e}")
 
 @app.route('/api/products', methods=['GET'])
 def get_products():
